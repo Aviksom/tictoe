@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic-Tac-Toe</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; display:grid; place-items:center;
+    font-family:Arial,sans-serif; background:#f5f5f5; color:#222;
+  }
+  .app{width:min(92vw,420px); text-align:center}
+  h1{margin:0 0 8px;font-size:36px}
+  .status{margin:0 0 20px;color:#666;font-size:18px}
+  .score{
+    display:flex; justify-content:space-between; gap:10px; margin-bottom:16px;
+  }
+  .score div{
+    flex:1; background:#fff; border:1px solid #ddd; border-radius:12px;
+    padding:12px; font-weight:bold;
+  }
+  .board{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+  }
+  .cell{
+    aspect-ratio:1; border:0; border-radius:14px; background:#fff;
+    box-shadow:0 2px 8px #00000012; font-size:52px; font-weight:700;
+    cursor:pointer; transition:.15s;
+  }
+  .cell:hover{transform:scale(1.02);background:#fafafa}
+  .cell:disabled{cursor:default}
+  .buttons{display:flex;gap:10px;margin-top:18px}
+  button.action{
+    flex:1;padding:13px;border:0;border-radius:10px;background:#222;color:#fff;
+    font-size:15px;cursor:pointer
+  }
+  button.secondary{background:#ddd;color:#222}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Tic-Tac-Toe</h1>
+  <p class="status" id="status">X's turn</p>
+
+  <div class="score">
+    <div>❌ X: <span id="xScore">0</span></div>
+    <div>⭕ O: <span id="oScore">0</span></div>
+    <div>Draws: <span id="drawScore">0</span></div>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <div class="buttons">
+    <button class="action" onclick="newGame()">New Game</button>
+    <button class="action secondary" onclick="resetScore()">Reset Score</button>
+  </div>
+</div>
+
+<script>
+let board = Array(9).fill("");
+let current = "X";
+let gameOver = false;
+let scores = {X:0,O:0,D:0};
+
+const boardEl = document.getElementById("board");
+const statusEl = document.getElementById("status");
+
+function render(){
+  boardEl.innerHTML = "";
+  board.forEach((value,i)=>{
+    const cell=document.createElement("button");
+    cell.className="cell";
+    cell.textContent=value==="X"?"❌":value==="O"?"⭕":"";
+    cell.disabled=!!value || gameOver;
+    cell.onclick=()=>move(i);
+    boardEl.appendChild(cell);
+  });
+  document.getElementById("xScore").textContent=scores.X;
+  document.getElementById("oScore").textContent=scores.O;
+  document.getElementById("drawScore").textContent=scores.D;
+}
+
+function move(i){
+  if(board[i] || gameOver) return;
+  board[i]=current;
+  const winner=checkWinner();
+
+  if(winner){
+    gameOver=true;
+    scores[winner]++;
+    statusEl.textContent=`${winner}'s wins! 🎉`;
+  } else if(board.every(Boolean)){
+    gameOver=true;
+    scores.D++;
+    statusEl.textContent="It's a draw!";
+  } else {
+    current=current==="X"?"O":"X";
+    statusEl.textContent=`${current}'s turn`;
+  }
+  render();
+}
+
+function checkWinner(){
+  const wins=[
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  for(const [a,b,c] of wins){
+    if(board[a] && board[a]===board[b] && board[a]===board[c])
+      return board[a];
+  }
+  return null;
+}
+
+function newGame(){
+  board=Array(9).fill("");
+  current="X";
+  gameOver=false;
+  statusEl.textContent="X's turn";
+  render();
+}
+
+function resetScore(){
+  scores={X:0,O:0,D:0};
+  newGame();
+}
+
+render();
+</script>
+</body>
+</html>
